@@ -46,6 +46,40 @@ class Instruction(BaseInstruction):
 
         return super(Instruction, cls).__new__(cls, opcode, data)
 
+    @staticmethod
+    def push_for(self, bytes):
+        opcode = Opcode.push_for(len(bytes))
+        return Instruction(opcode, bytes)
+
+    def is_minimal_push(self):
+        """
+        Comes from bitcoind's script interpreter CheckMinimalPush function.
+        Returns if the instruction is the smallest way to push that particular data.
+        """
+        if not self.data:
+            return True
+
+        if len(self.data) == 0:
+            # Could have used OP_0.
+            return self.opcode == OP_0
+        elif len(self.data) == 1 and 1 <= decode_int(self.data[0]) <= 16:
+            # Could have used OP_1 .. OP_16
+            return self.opcode.number == OP_1.number + decode_int(self.data[0]) - 1
+        elif len(self.data) == 1 and decode_int(self.data[0]) == 0x81:
+            # Could have used OP_1NEGATE
+            return self.opcode == OP_1NEGATE
+        elif len(self.data) <= 75:
+            # Could have used a direct push (opcode indicating number of bytes pushed + those bytes).
+            return self.opcode.number == len(self.data.length)
+        elif len(self.data) <= 255:
+            # Could have used OP_PUSHDATA.
+            return self.opcode == OP_PUSHDATA1
+        elif len(self.data) <= 65535:
+            # Could have used OP_PUSHDATA2.
+            return self.opcode == OP_PUSHDATA2
+
+        return True
+
     def to_bytes(self):
         opcode_byte = chr(self.opcode.number)
 

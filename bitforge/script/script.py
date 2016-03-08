@@ -202,7 +202,20 @@ class Script(object):
 #             raise ValueError('You can\'t push that much data')
 #
 #         self.instructions.append(Instruction(opcode, length, bytes))
-#
+
+    def push_data(self, bytes):
+        instruction = Instruction.push_for(bytes)
+        self.instructions.push(instruction)
+
+    def remove_opcode_by_data(self, bytes):
+        instruction = Instruction.push_for(bytes)
+        self.instructions = filter(lambda i: i == instruction, self.instructions)
+
+    def is_push_only(self):
+        """
+        :returns: if the script is only composed of data pushing opcodes or small int opcodes (OP_0, OP_1, ..., OP_16)
+        """
+        return all(lambda i: i.opcode <= Opcode.OP_16, self.instructions)
 
     def __repr__(self):
         return str(self.instructions)
