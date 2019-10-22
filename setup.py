@@ -16,7 +16,7 @@ setuptools.setup(
 
   setup_requires=['pytest-runner'],
   tests_require=['pytest'],
-  install_requires = ['ecdsa==0.13'] + (['enum34==1.0.4'] if sys.version_info < (3, 4) else []),
+  install_requires = ['ecdsa==0.13.3'] + (['enum34==1.0.4'] if sys.version_info < (3, 4) else []),
 
   classifiers = [
       'Development Status :: 4 - Beta',
